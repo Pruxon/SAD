@@ -1,0 +1,1 @@
+Project for Statistics in data analysis
