@@ -1,0 +1,129 @@
+---
+title: "Raport z projektu 1 z przedmiotu 'Statystyka w Analizie Danych'"
+author: "Karbownik Patrycja, Prugarewicz Jan"
+date: "23 11 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r prepare data, include=FALSE}
+df_enea = read.csv('data/ENEA.mst')
+names(df_enea) = c('ticker', 'date', 'open', 'high', 'low', 'close', 'vol')
+df_enea$date = as.Date.character(df_enea$date, format = '%Y%m%d')
+df_enea$year = format(df_enea$date, format = '%Y')
+df_enea_2019 = subset(df_enea, df_enea$year == 2019)
+
+df_kghm = read.csv('data/KGHM.mst')
+names(df_kghm) = c('ticker', 'date', 'open', 'high', 'low', 'close', 'vol')
+df_kghm$date = as.Date.character(df_kghm$date, format = '%Y%m%d')
+df_kghm$year = format(df_kghm$date, format = '%Y')
+df_kghm_2019 = subset(df_kghm, df_kghm$year == 2019)
+```
+
+# Zadanie 1. Dla dwóch spółek notowanych na WGPW (KGHM POLSKA MIEDŹ SPÓŁKA AKCYJNA (KGH), ENEA SPÓŁKA AKCYJNA (ENA)) na podstawie ich notowań z roku 2019:
+
+## a. wyznacz procentowe zmiany cen otwarcia tych spółek
+
+```{r 1a-enea, fig.height=4}
+df_enea_2019$open_ch = with(df_enea_2019, c(NA, 100*diff(open)/open[1:length(open) -1]))
+plot(open_ch ~ date, df_enea_2019,
+     type = 'l', col = 'blue',
+     xlab = 'Data otwarcia spolki', ylab = 'Zmiana ceny otwarcia [%]',
+     main = 'Procentowe zmiany cen otwarcia ENEA w roku 2019')
+grid()
+```
+
+```{r 1a-kghm, fig.height=4}
+df_kghm_2019$open_ch = with(df_kghm_2019, c(NA, 100*diff(open)/open[1:length(open) -1]))
+plot(open_ch ~ date, df_kghm_2019,
+     type = 'l', col = 'blue',
+     xlab = 'Data otwarcia spolki', ylab = 'Zmiana ceny otwarcia [%]',
+     main = 'Procentowe zmiany cen otwarcia KGHM w roku 2019')
+grid()
+```
+
+## b. zilustruj rozkłady ww. zmian (histogramy + wykresy pudełkowe)
+
+```{r 1b-enea-hist, fig.height=4}
+hist(df_enea_2019$open_ch, breaks = 50, prob = T,
+     xlab = 'Zmiana ceny otwarcia [%]',
+     ylab = 'Czestosc wystepowania',
+     main = 'Histogram proc. zmian cen otwarcia ENEA w roku 2019')
+grid()
+```
+
+```{r 1b-enea-boxplot, fig.height=4}
+boxplot(df_enea_2019 $open_ch,
+        ylab = 'Zmiana ceny otwarcia [%]',
+        main = 'Wykres pudelkowy proc. zmian cen otwarcia ENEA w roku 2019')
+grid()
+```
+
+
+```{r 1b-kghm-hist, fig.height=4}
+hist(df_kghm_2019$open_ch, breaks = 50, prob = T,
+     xlab = 'Zmiana ceny otwarcia [%] ',
+     ylab = 'Czestosc wystepowania',
+     main = 'Histogram proc. zmian cen otwarcia KGHM w roku 2019')
+grid()
+```
+
+```{r 1b-kghm-boxplot, fig.height=4}
+boxplot(df_kghm_2019 $open_ch,
+        ylab = 'Zmiana ceny otwarcia [%] ',
+        main = 'Wykres pudelkowy proc. zmian cen otwarcia KGHM w roku 2019')
+grid()
+```
+
+## c. wyestymuj parametry rozkładów normalnych mogących modelować ww. rozkłady
+
+##### Spółka ENEA
+###### średnia
+```{r 1c-enea, include=FALSE}
+m_enea = mean(df_enea_2019$open_ch, na.rm = T)
+s_enea = sd(df_enea_2019$open_ch, na.rm = T)
+m_kghm = mean(df_kghm_2019$open_ch, na.rm = T)
+s_kghm = sd(df_kghm_2019$open_ch, na.rm = T)
+```
+
+```{r 1c-enea-mean, results="asis"}
+print(m_enea)
+```
+
+###### wariancja
+```{r 1c-enea-variance, results="asis"}
+print(s_enea)
+```
+
+##### Spółka KGHM
+###### średnia
+```{r 1c-kghm-mean, results="asis"}
+print(m_kghm)
+```
+
+###### wariancja
+```{r 1c-kghm-variance,results="asis"}
+print(s_kghm)
+```
+
+## d. porównaj graficznie rozkłady modelowe z danymi
+```{r 1d-enea, fig.height=4}
+hist(df_enea_2019$open_ch, breaks = 50, prob = T,
+     xlab = 'Zmiana ceny otwarcia [%] ',
+     ylab = 'Czestosc wystepowania',
+     main = 'Zestawienie danych z modelem proc. zmian cen otwarcia \n ENEA w roku 2019')
+curve(dnorm(x, mean = m_enea, sd = s_enea), add = T, col = 'red', -10, 10)
+grid()
+```
+
+```{r 1d-kghm, fig.height=4}
+hist(df_kghm_2019$open_ch, breaks = 50, prob = T,
+     xlab = 'Zmiana ceny otwarcia [%] ',
+     ylab = 'Czestosc wystepowania',
+     main = 'Zestawienie danych z modelem proc. zmian cen otwarcia \n KGHM w roku 2019')
+curve(dnorm(x, mean = m_kghm, sd = s_kghm), add = T, col = 'red', -10, 10)
+grid()
+```
