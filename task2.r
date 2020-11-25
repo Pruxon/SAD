@@ -37,9 +37,8 @@ ggboxplot(phases, x = "phase", y = "amount", color = "phase", palette = "npg") +
 #b
 
 selectedDay = tauronPeSeptember[tauronPeSeptember$DATE == 20200917,]
-selectedData = selectedDay[selectedDay$TIME <= 110000,]
-
-timeToConvert = selectedData$TIME
+selectedData = selectedDay[selectedDay$TIME > 100000,]
+selectedData = selectedData[selectedData$TIME <= 120000,]
 
 chosenTime = selectedData
 chosenTime$MINUTE = ((selectedData$TIME - selectedData$TIME%%100)%%10000)/100
@@ -52,6 +51,7 @@ hourIterator = as.integer(10)
 dataIterator = as.integer(1)
 for (i in 1:length(chosenTime$MINUTE)) {
   if ((chosenTime$MINUTE[i] == minuteIterator) && (chosenTime$HOUR[i] == hourIterator)){
+    #print(hourIterator, minuteIterator, dataIterator, chosenTime$MINUTE[i], chosenTime$HOUR[i])
     aggregatedData[dataIterator] = aggregatedData[dataIterator] + chosenTime$AMOUNT[i]
   } else {
     while (chosenTime$MINUTE[i] != minuteIterator || chosenTime$HOUR[i] != hourIterator) {
@@ -72,11 +72,11 @@ for (i in 1:120) {
 }
 outputData <- data.frame(aggregatedData, test)
 
-ggplot(outputData) + geom_point(aes(x = test, y = aggregatedData/1000)) + labs(title="The occurrence of transactions over time", x="Time", y="Number of transactions in one minute [10^3]")
+ggplot(outputData) + geom_point(aes(x = test, y = aggregatedData/10000)) + labs(title="The occurrence of transactions over time", x="Time", y="Number of transactions in one minute [10^4]")
 
 
 lambda = mean(outputData$aggregatedData/10000)
-hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Number of transactions in one minute",  ylab = "Probability of occurance",
+hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Number of transactions in one minute[10^4]",  ylab = "Probability of occurance",
   main = "Comparison with TauronPe model")
   curve(dpois(x, lambda = lambda), add = T, col = "blue", 0, 100)
   grid()
