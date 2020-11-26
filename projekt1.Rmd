@@ -151,8 +151,8 @@ Założenia:
 * fixing zamknięcia - wszystkie dane po 17:00:00 włącznie 
 * notowania podczas dnia - pozostałe (czyli po 9:00:01 i przed 16:55:01)
 
-### Podział danych na fazy giełdowe
-```{r prepare data, include=FALSE}
+
+```{r prepare-data, include=FALSE}
 openFixings = tauronPeSeptember[tauronPeSeptember$TIME == 90001,]
 afterOpenFixings = tauronPeSeptember[tauronPeSeptember$TIME > 90001,]
 duringDayTrading = afterOpenFixings[afterOpenFixings$TIME <= 165500,]
@@ -167,32 +167,31 @@ septemberSum = openFixings$AMOUNT + duringDayTrading$AMOUNT + closeFixings$AMOUN
 
 ```
 
-### Przedstawienie rozkładu transakcji w zależności od fazy na wykresie ciągłym
 
-```{r plot}
+
+```{r plot-b, fig.height=4}
 phases = data.frame(openFixings$DATE, openFixings$AMOUNT/septemberSum, duringDayTrading$AMOUNT/septemberSum, closeFixings$AMOUNT/septemberSum)
 colnames(phases) = c("date", "open", "during_day", "close")
 
 ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "open fixing")) +
   geom_line(aes(y = close, color = "close fixing")) +
   geom_line(aes(y = during_day, color = "during day trading")) +
-  labs(title = "Distribution of transactions in days depending on trading phase", x = "Data", y = "Percentage share of transactions")
+  labs(title = "Rozklad transakcji w zaleznosci od fazy - wykres ciagly", x = "Dane", y = "Procentowy udzial transakcji")
 
 ```
 
-### Przedstawienie rozkładu transakcji w zależności od fazy na wykresie pudełkowym
-```{r boxplot}
+
+```{r boxplot, fig.height=3}
 phases2 = data.frame(amount = c(openFixings$AMOUNT/septemberSum, duringDayTrading$AMOUNT/septemberSum, closeFixings$AMOUNT/septemberSum),
                    phase = c(rep("open", daysNumber), rep("during day", daysNumber), rep("close", daysNumber)),
                    data = c(openFixings$DATE, openFixings$DATE, openFixings$DATE))
-ggboxplot(phases2, x = "phase", y = "amount", color = "phase", palette = "npg") + labs(title="Distribution of transacrions in days depending onn the trading phase", x="Phase", y="Percentage share in transactions")
+ggboxplot(phases2, x = "phase", y = "amount", color = "phase", palette = "npg") + labs(title="Rozklad transakcji w zaleznosci od fazy - wykres pudelkowy", x="Faza", y="Udzial procentowy")
 
 ```
 
 ## Rozwiązanie podpunktu b
 
-### Podział danych na dane z 17 września między 10 a 12
-Wybrałem 17 września bo lubię liczbę 17.
+### Wybrany został dzień 17 września, a godziny między 10 i 12
 
 ```{r september-data, include=FALSE}
 selectedDay = tauronPeSeptember[tauronPeSeptember$DATE == 20200917,]
@@ -200,7 +199,6 @@ selectedData = selectedDay[selectedDay$TIME > 100000,]
 selectedData = selectedData[selectedData$TIME <= 120000,]
 ```
 
-Odczytanie minut i godzin z liczb typu HHMMSS:
 ```{r numbers-to-hours-and-minute, include=FALSE}
 chosenTime = selectedData
 chosenTime$MINUTE = ((selectedData$TIME - selectedData$TIME%%100)%%10000)/100
@@ -228,7 +226,6 @@ for (i in 1:length(chosenTime$MINUTE)) {
 }
 ```
 
-Przygotowanie zagregowanych danych do wykresu
 ```{r plot-data, include=FALSE}
 minutes = rep(0, 120)
 for (i in 1:120) {
@@ -237,24 +234,24 @@ for (i in 1:120) {
 outputData <- data.frame(aggregatedData, minutes)
 ```
 
-Dwugodzinny wykres
-```{r plot}
-ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="The occurrence of transactions over time", x="Time", y="Number of transactions in one minute [10^4]")
+
+```{r plot-b2, fig.height=4}
+ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystapienia transakcji w czasie", x="Czas", y="Ilosc transakcji w jednej minucie[10^4]")
 ```
 
-Parametr z rozkładu Poissona 
-```{r wykres}
+
+```{r wykres, include=FALSE}
 lambda = mean(outputData$aggregatedData/10000)
 ```
 
-Porównanie rozkładu Poissona z danymi
-```{r comparison}
-hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Number of transactions in one minute[10^4]",  ylab = "Probability of occurance",
-  main = "Comparison with TauronPe model")
+
+```{r comparison, fig.height=4}
+hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Ilosc transakcji w jednej minucie[10^4]",  ylab = "Prawdopodobienstwo wystapienia",
+  main = "Porownanie modelu z rozkladem Poisson'a")
   curve(dpois(x, lambda = lambda), add = T, col = "blue", 0, 100)
   grid()
 ```
 
 ## Wnioski
 
-Rozkład Poissona ma podobny kształt na wykresie jak zobrazowanie rzeczywistych danych, jednak ma dość zaburzone proporcje wybrzuszenia i wypłaszczenia.
+Rozkład Poissona ma podobny kształt na wykresie jak zobrazowanie rzeczywistych danych, jednak ma dość zaburzone proporcje wybrzuszenia i wypłaszczenia. Przedstawienie jest wystarczające, ale nie optymalne.
