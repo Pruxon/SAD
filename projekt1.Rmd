@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+pdf.options(encoding = 'ISOLatin2')
 ```
 
 ```{r prepare data, include=FALSE}
@@ -23,7 +24,9 @@ df_kghm$year = format(df_kghm$date, format = '%Y')
 df_kghm_2019 = subset(df_kghm, df_kghm$year == 2019)
 ```
 
-# Zadanie 1. Dla dwóch spółek notowanych na WGPW (KGHM POLSKA MIEDŹ SPÓŁKA AKCYJNA (KGH), ENEA SPÓŁKA AKCYJNA (ENA)) na podstawie ich notowań z roku 2019:
+# Zadanie 1
+## Treść zadania
+Dla dwóch spółek notowanych na WGPW (KGHM POLSKA MIEDŹ SPÓŁKA AKCYJNA (KGH), ENEA SPÓŁKA AKCYJNA (ENA)) na podstawie ich notowań z roku 2019:
 
 ## a. wyznacz procentowe zmiany cen otwarcia tych spółek
 
@@ -31,7 +34,7 @@ df_kghm_2019 = subset(df_kghm, df_kghm$year == 2019)
 df_enea_2019$open_ch = with(df_enea_2019, c(NA, 100*diff(open)/open[1:length(open) -1]))
 plot(open_ch ~ date, df_enea_2019,
      type = 'l', col = 'blue',
-     xlab = 'Data otwarcia spolki', ylab = 'Zmiana ceny otwarcia [%]',
+     xlab = 'Data', ylab = 'Zmiana ceny otwarcia [%]',
      main = 'Procentowe zmiany cen otwarcia ENEA w roku 2019')
 grid()
 ```
@@ -40,7 +43,7 @@ grid()
 df_kghm_2019$open_ch = with(df_kghm_2019, c(NA, 100*diff(open)/open[1:length(open) -1]))
 plot(open_ch ~ date, df_kghm_2019,
      type = 'l', col = 'blue',
-     xlab = 'Data otwarcia spolki', ylab = 'Zmiana ceny otwarcia [%]',
+     xlab = 'Data', ylab = 'Zmiana ceny otwarcia [%]',
      main = 'Procentowe zmiany cen otwarcia KGHM w roku 2019')
 grid()
 ```
@@ -50,7 +53,7 @@ grid()
 ```{r 1b-enea-hist, fig.height=4}
 hist(df_enea_2019$open_ch, breaks = 50, prob = T,
      xlab = 'Zmiana ceny otwarcia [%]',
-     ylab = 'Czestosc wystepowania',
+     ylab = 'Częstość występowania',
      main = 'Histogram proc. zmian cen otwarcia ENEA w roku 2019')
 grid()
 ```
@@ -58,7 +61,7 @@ grid()
 ```{r 1b-enea-boxplot, fig.height=4}
 boxplot(df_enea_2019 $open_ch,
         ylab = 'Zmiana ceny otwarcia [%]',
-        main = 'Wykres pudelkowy proc. zmian cen otwarcia ENEA w roku 2019')
+        main = 'Wykres pudełkowy proc. zmian cen otwarcia ENEA w roku 2019')
 grid()
 ```
 
@@ -66,7 +69,7 @@ grid()
 ```{r 1b-kghm-hist, fig.height=4}
 hist(df_kghm_2019$open_ch, breaks = 50, prob = T,
      xlab = 'Zmiana ceny otwarcia [%] ',
-     ylab = 'Czestosc wystepowania',
+     ylab = 'Częstość występowania',
      main = 'Histogram proc. zmian cen otwarcia KGHM w roku 2019')
 grid()
 ```
@@ -74,7 +77,7 @@ grid()
 ```{r 1b-kghm-boxplot, fig.height=4}
 boxplot(df_kghm_2019 $open_ch,
         ylab = 'Zmiana ceny otwarcia [%] ',
-        main = 'Wykres pudelkowy proc. zmian cen otwarcia KGHM w roku 2019')
+        main = 'Wykres pudełkowy proc. zmian cen otwarcia KGHM w roku 2019')
 grid()
 ```
 
@@ -113,7 +116,7 @@ print(s_kghm)
 ```{r 1d-enea, fig.height=4}
 hist(df_enea_2019$open_ch, breaks = 50, prob = T,
      xlab = 'Zmiana ceny otwarcia [%] ',
-     ylab = 'Czestosc wystepowania',
+     ylab = 'Częstość występowania',
      main = 'Zestawienie danych z modelem proc. zmian cen otwarcia \n ENEA w roku 2019')
 curve(dnorm(x, mean = m_enea, sd = s_enea), add = T, col = 'red', -10, 10)
 grid()
@@ -122,7 +125,7 @@ grid()
 ```{r 1d-kghm, fig.height=4}
 hist(df_kghm_2019$open_ch, breaks = 50, prob = T,
      xlab = 'Zmiana ceny otwarcia [%] ',
-     ylab = 'Czestosc wystepowania',
+     ylab = 'Częstość występowania',
      main = 'Zestawienie danych z modelem proc. zmian cen otwarcia \n KGHM w roku 2019')
 curve(dnorm(x, mean = m_kghm, sd = s_kghm), add = T, col = 'red', -10, 10)
 grid()
@@ -133,13 +136,9 @@ grid()
 ## Treść zadania
 
 Na podstawie notowań pewnej spółki we wrześniu 2020 (Tauron Polska Energia Spółka Akcyjna):
-+ zilustruj jak liczba transakcji na danym instrumencie rozkłada się w czasie w ramach giełdowej sesji (chodzi zarówno o podział między 3 fazami: fixingiem otwarcia, notowaniami ciągłymi, fixingiem zamknięcia, jak i rozkład liczby transakcji w czasie fazy notowań ciągłych),
-+ wybierz dzień i 2-godzinny przedział czasu, w ramach którego
-  - wyznacz liczby transakcji zawieranych w kolejnych 1-minutowych odcinkach czasu (120 liczb),
-  - zamodeluj ww. liczby za pomocą rozkładu Poissona,
-  - porównaj rozkład modelowy z danymi.
   
-## Rozwiązanie podpunktu a
+## a. zilustruj jak liczba transakcji na danym instrumencie rozkłada się w czasie w ramach giełdowej sesji (chodzi zarówno o podział między 3 fazami: fixingiem otwarcia, notowaniami ciągłymi, fixingiem zamknięcia, jak i rozkład liczby transakcji w czasie fazy notowań ciągłych)
+
 ```{r setup-task2, include=FALSE}
 require(ggplot2)
 require(ggpubr)
@@ -176,8 +175,7 @@ colnames(phases) = c("date", "open", "during_day", "close")
 ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "open fixing")) +
   geom_line(aes(y = close, color = "close fixing")) +
   geom_line(aes(y = during_day, color = "during day trading")) +
-  labs(title = "Rozklad transakcji w zaleznosci od fazy - wykres ciagly", x = "Dane", y = "Procentowy udzial transakcji")
-
+  labs(title = "Rozkład transakcji w zależności od fazy - wykres ciągły", x = "Dane", y = "Procentowy udział transakcji")
 ```
 
 
@@ -185,11 +183,14 @@ ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "open fixing")) +
 phases2 = data.frame(amount = c(openFixings$AMOUNT/septemberSum, duringDayTrading$AMOUNT/septemberSum, closeFixings$AMOUNT/septemberSum),
                    phase = c(rep("open", daysNumber), rep("during day", daysNumber), rep("close", daysNumber)),
                    data = c(openFixings$DATE, openFixings$DATE, openFixings$DATE))
-ggboxplot(phases2, x = "phase", y = "amount", color = "phase", palette = "npg") + labs(title="Rozklad transakcji w zaleznosci od fazy - wykres pudelkowy", x="Faza", y="Udzial procentowy")
+ggboxplot(phases2, x = "phase", y = "amount", color = "phase", palette = "npg") + labs(title="Rozkład transakcji w zależności od fazy - wykres pudełkowy", x="Faza", y="Udział procentowy")
 
 ```
 
-## Rozwiązanie podpunktu b
+## b. wybierz dzień i 2-godzinny przedział czasu, w ramach którego
+##  - wyznacz liczby transakcji zawieranych w kolejnych 1-minutowych odcinkach czasu (120 liczb),
+##  - zamodeluj ww. liczby za pomocą rozkładu Poissona,
+##  - porównaj rozkład modelowy z danymi
 
 ### Wybrany został dzień 17 września, a godziny między 10 i 12
 
@@ -236,7 +237,7 @@ outputData <- data.frame(aggregatedData, minutes)
 
 
 ```{r plot-b2, fig.height=4}
-ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystapienia transakcji w czasie", x="Czas", y="Ilosc transakcji w jednej minucie[10^4]")
+ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystąpienia transakcji w czasie", x="Czas", y="Liczba transakcji w jednej minucie[10^4]")
 ```
 
 
@@ -246,8 +247,8 @@ lambda = mean(outputData$aggregatedData/10000)
 
 
 ```{r comparison, fig.height=4}
-hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Ilosc transakcji w jednej minucie[10^4]",  ylab = "Prawdopodobienstwo wystapienia",
-  main = "Porownanie modelu z rozkladem Poisson'a")
+hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Liczba transakcji w jednej minucie[10^4]",  ylab = "Prawdopodobieństwo wystąpienia",
+  main = "Porównanie modelu z rozkładem Poisson'a")
   curve(dpois(x, lambda = lambda), add = T, col = "blue", 0, 100)
   grid()
 ```
