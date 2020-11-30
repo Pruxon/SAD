@@ -3,9 +3,9 @@ title: "Raport z projektu 1 z przedmiotu 'Statystyka w Analizie Danych'"
 author: "Karbownik Patrycja, Prugarewicz Jan"
 date: "29 11 2020"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -175,10 +175,10 @@ septemberSum = openFixings$AMOUNT + duringDayTrading$AMOUNT + closeFixings$AMOUN
 phases = data.frame(openFixings$DATE, openFixings$AMOUNT/septemberSum*100, duringDayTrading$AMOUNT/septemberSum*100, closeFixings$AMOUNT/septemberSum*100)
 colnames(phases) = c("date", "open", "during_day", "close")
 
-ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "open fixing")) +
-  geom_line(aes(y = close, color = "close fixing")) +
-  geom_line(aes(y = during_day, color = "during day trading")) +
-  labs(title = "Rozkład transakcji w zależności od fazy - wykres ciągły", x = "Dane", y = "Procentowy udział transakcji")
+ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "fixing otwarcia")) +
+  geom_line(aes(y = close, color = "fixing zamknięcia")) +
+  geom_line(aes(y = during_day, color = "transakcje podczas dnia")) +
+  labs(title = "Rozkład transakcji w zależności od fazy - wykres ciągły", x = "Data", y = "Procentowy udział transakcji")
 ```
 
 
@@ -240,7 +240,7 @@ outputData <- data.frame(aggregatedData, minutes)
 
 
 ```{r plot-b2, fig.height=5}
-ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystąpienia transakcji w czasie", x="Czas, w ciągu wybranych dwóch godzin", y="Liczba transakcji w jednej minucie[10^4]")
+ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystąpienia transakcji w czasie", x="Czas, w ciągu wybranych dwóch godzin [min]", y="Liczba transakcji w jednej minucie[10^4]")
 ```
 
 
@@ -258,5 +258,5 @@ hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, x
 
 ## Wnioski
 
-Rozkład Poissona kształtem wykresu przypomina zobrazowanie rzeczywistych danych. Proporcje, przy użyciu rozkładu Poissona, są jednak dość zaburzone, ponieważ w odzwierciedleniu danych maksimum występuje dla 0-1 transakcji na minutę a nie dla 1-2, jak według rozkładu. Przedstawienie więc nie jest idealne, ale wystarczająco dobrze obrazuje dane. 
+Rozkład Poissona kształtem wykresu przypomina zobrazowanie rzeczywistych danych. Proporcje, przy użyciu rozkładu Poissona, są jednak dość zaburzone, ponieważ w odzwierciedleniu danych maksimum występuje dla 0 transakcji na minutę a nie dla 1, jak według rozkładu. Przedstawienie więc nie jest idealne, ale wystarczająco dobrze obrazuje dane. 
 
