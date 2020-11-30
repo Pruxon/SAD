@@ -1,8 +1,11 @@
 ---
 title: "Raport z projektu 1 z przedmiotu 'Statystyka w Analizie Danych'"
 author: "Karbownik Patrycja, Prugarewicz Jan"
-date: "23 11 2020"
-output: pdf_document
+date: "29 11 2020"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -145,16 +148,16 @@ require(ggpubr)
 tauronPeSeptember = read.csv('data/TAURONPE.prn')
 ```
 
-Założenia:
-* fixing otwarcia - pierwszy zapis z każdego dnia, czyli o 9:00:01
-* fixing zamknięcia - wszystkie dane po 17:00:00 włącznie 
-* notowania podczas dnia - pozostałe (czyli po 9:00:01 i przed 16:55:01)
+#### Założenia:
+#### * fixing otwarcia - pierwszy zapis z każdego dnia, czyli o 9:00:01
+#### * fixing zamknięcia - wszystkie dane po 17:00:00 włącznie 
+#### * notowania podczas dnia - pozostałe (czyli po 9:00:01 i przed 16:59:59)
 
 
 ```{r prepare-data, include=FALSE}
 openFixings = tauronPeSeptember[tauronPeSeptember$TIME == 90001,]
 afterOpenFixings = tauronPeSeptember[tauronPeSeptember$TIME > 90001,]
-duringDayTrading = afterOpenFixings[afterOpenFixings$TIME <= 165500,]
+duringDayTrading = afterOpenFixings[afterOpenFixings$TIME <= 165959,]
 
 duringDayTrading = aggregate(x = duringDayTrading$AMOUNT, by = list(duringDayTrading$DATE), FUN = sum)
 duringDayTrading$AMOUNT = duringDayTrading$x
@@ -168,22 +171,22 @@ septemberSum = openFixings$AMOUNT + duringDayTrading$AMOUNT + closeFixings$AMOUN
 
 
 
-```{r plot-b, fig.height=4}
-phases = data.frame(openFixings$DATE, openFixings$AMOUNT/septemberSum, duringDayTrading$AMOUNT/septemberSum, closeFixings$AMOUNT/septemberSum)
+```{r plot-b, fig.height=5}
+phases = data.frame(openFixings$DATE, openFixings$AMOUNT/septemberSum*100, duringDayTrading$AMOUNT/septemberSum*100, closeFixings$AMOUNT/septemberSum*100)
 colnames(phases) = c("date", "open", "during_day", "close")
 
-ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "open fixing")) +
-  geom_line(aes(y = close, color = "close fixing")) +
-  geom_line(aes(y = during_day, color = "during day trading")) +
-  labs(title = "Rozkład transakcji w zależności od fazy - wykres ciągły", x = "Dane", y = "Procentowy udział transakcji")
+ggplot(phases, aes(date)) + geom_line(aes(y = open, color = "fixing otwarcia")) +
+  geom_line(aes(y = close, color = "fixing zamknięcia")) +
+  geom_line(aes(y = during_day, color = "transakcje podczas dnia")) +
+  labs(title = "Rozkład transakcji w zależności od fazy - wykres ciągły", x = "Data", y = "Procentowy udział transakcji")
 ```
 
 
-```{r boxplot, fig.height=3}
-phases2 = data.frame(amount = c(openFixings$AMOUNT/septemberSum, duringDayTrading$AMOUNT/septemberSum, closeFixings$AMOUNT/septemberSum),
-                   phase = c(rep("open", daysNumber), rep("during day", daysNumber), rep("close", daysNumber)),
+```{r boxplot, fig.height=6}
+phases2 = data.frame(amount = c(openFixings$AMOUNT/septemberSum*100, duringDayTrading$AMOUNT/septemberSum*100, closeFixings$AMOUNT/septemberSum*100),
+                   faza = c(rep("otwarcia", daysNumber), rep("podczas dnia", daysNumber), rep("zamknięcia", daysNumber)),
                    data = c(openFixings$DATE, openFixings$DATE, openFixings$DATE))
-ggboxplot(phases2, x = "phase", y = "amount", color = "phase", palette = "npg") + labs(title="Rozkład transakcji w zależności od fazy - wykres pudełkowy", x="Faza", y="Udział procentowy")
+ggboxplot(phases2, x = "faza", y = "amount", color = "faza", palette = "npg") + labs(title="Rozkład transakcji w zależności od fazy - wykres pudełkowy", x="Faza", y="Udział procentowy")
 
 ```
 
@@ -236,8 +239,8 @@ outputData <- data.frame(aggregatedData, minutes)
 ```
 
 
-```{r plot-b2, fig.height=4}
-ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystąpienia transakcji w czasie", x="Czas", y="Liczba transakcji w jednej minucie[10^4]")
+```{r plot-b2, fig.height=5}
+ggplot(outputData) + geom_point(aes(x = minutes, y = aggregatedData/10000)) + labs(title="Wystąpienia transakcji w czasie", x="Czas, w ciągu wybranych dwóch godzin [min]", y="Liczba transakcji w jednej minucie[10^4]")
 ```
 
 
@@ -246,7 +249,7 @@ lambda = mean(outputData$aggregatedData/10000)
 ```
 
 
-```{r comparison, fig.height=4}
+```{r comparison, fig.height=5}
 hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, xlab = "Liczba transakcji w jednej minucie[10^4]",  ylab = "Prawdopodobieństwo wystąpienia",
   main = "Porównanie modelu z rozkładem Poisson'a")
   curve(dpois(x, lambda = lambda), add = T, col = "blue", 0, 100)
@@ -255,4 +258,5 @@ hist(outputData$aggregatedData/10000, breaks = 10, ylim = c(0, 0.6), prob = T, x
 
 ## Wnioski
 
-Rozkład Poissona ma podobny kształt na wykresie jak zobrazowanie rzeczywistych danych, jednak ma dość zaburzone proporcje wybrzuszenia i wypłaszczenia. Przedstawienie jest wystarczające, ale nie optymalne.
+Rozkład Poissona kształtem wykresu przypomina zobrazowanie rzeczywistych danych. Proporcje, przy użyciu rozkładu Poissona, są jednak dość zaburzone, ponieważ w odzwierciedleniu danych maksimum występuje dla 0 transakcji na minutę a nie dla 1, jak według rozkładu. Przedstawienie więc nie jest idealne, ale wystarczająco dobrze obrazuje dane. 
+
